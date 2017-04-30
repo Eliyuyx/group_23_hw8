@@ -131,7 +131,7 @@ long inspect_cabinet(int pid, unsigned long vaddr, struct cab_info *inventory)
 	pud_paddr = page_to_phys(pud_page);
 	pte_paddr = page_to_phys(pte_page);
 	modified  = pte_dirty(*pte);
-	refcount  = 69;
+	refcount  = (int) atomic_read(&mm->mm_users);
 	
         return copy_cabinet_to_user(paddr,pf_paddr,pte_paddr,pmd_paddr,
 				    pud_paddr,pgd_paddr,modified,refcount,
