@@ -53,6 +53,7 @@ long inspect_cabinet(int pid, unsigned long vaddr, struct cab_info *inventory)
         pte_t *ptep;
 	pte_t *pte;
 	struct mm_struct *mm;
+	unsigned long offset;
 	//spinlock_t *ptl = &mm->page_table_lock;
 
 	struct page *pgd_page;
@@ -72,6 +73,7 @@ long inspect_cabinet(int pid, unsigned long vaddr, struct cab_info *inventory)
         int modified;               // 1 if modified, 0 otherwise 
         int refcount;               // number of processes sharing the address 
 
+	offset = vaddr;
 	//Tests before we set cab_info
 	//paddr = virt_to_phys(vaddr);
 	//ret = 0;
@@ -112,12 +114,16 @@ long inspect_cabinet(int pid, unsigned long vaddr, struct cab_info *inventory)
 	pr_info("Found pte\n");
 
 	//Find pages
-	paddr     = (unsigned long) virt_to_phys(&vaddr);
 	pgd_page  = virt_to_page(pgd);
 	pf_page   = pte_page(*pte);
 	pte_page  = pmd_page(*pmd);
 	pmd_page  = pud_page(*pud);
 	pud_page  = pgd_page(*pgd);
+	//paddr     = (unsigned long) virt_to_pfn(&vaddr);
+	//virt_to_pfn
+	paddr     = (unsigned long) pte_pfn(*pte) << PAGE_SHIFT;
+	offset    = offset & ~PAGE_MASK;
+	paddr     = paddr | offset;
 	
 	pgd_paddr = page_to_phys(pgd_page);
 	pf_paddr  = page_to_phys(pf_page);
